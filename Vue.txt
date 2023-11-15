@@ -1,0 +1,73 @@
+npm i 오류 해결방법
+npm install react-paypal-express-checkout --save --legacy-peer-deps
+
+뒤에 --save부터 다붙이면댐
+
+-라이프 사이클
+before created  
+created  :  methods, data 속성 접근 가능 / template 속성 접근 불가 
+beforeMount : 화면돔요소에 인스턴스 부착하기 전 호출하는 단계. / render() 함수 호출 직전 로직 추가해야
+mounted : 인스턴스 부착 후 호출되는 단계 템플릿 속성 접근 가능
+beforeUpdated : 변경 예정인 새 데이터에 접근 가능 변경 예정 데이터의 값, 로직넣어야
+updated : 
+beforeDestroy : 인스턴스 사망 직전 호출 단계 아직 인스턴스 접근 가능 / 인스턴스 데이터 삭제하기 좋음
+destroyed : 인스턴스 사망 단계 속성 제거, 하위 인스턴스 또한 삭제
+
+
+v-model 디렉티브는 <input> / <select> / <textarea> 태그만 가능
+watch : 복잡한로직 적합 비동기처리 적합 / computed: 자동 데이터 계산 return 필수
+confict 에러 날때
+- input 속성에 v-bind:value , v-model를 함께 쓰면 충돌
+
+
+
+1.. v-bind:key 는 객체가 될 수 없고 String이나 Int가 와야함 
+2. v-bind:class는 class를 동적으로 부여할 수 있음 ex: v-bind:class="{textCompleted: todoItem.completed} todoItem.completed의 불런 값에 따라 
+동적으로 클래스 적용을 한다. todoItem은 객체임(JSON.parse) v-on:keyup.esc = "showModal=false" slot 중요! 
+-- ES5는 호이스팅 된다 (변수 선언부터 먼저 다끌어올림. 그래서 sum = sum + i 밑에 var = i 해도 오류안남) 
+
+Vuex = 상태 관리 라이브러리 https://joshua1988.github.io/web-development/javascript/promise-for-beginners/#promise%EA%B0%80-%EB%AD%94%EA%B0%80%EC%9A%94 
+(걍 전역변수임)
+import Vue from 'vue' import Vuex from 'vuex' Vue.use(Vuex); export const store = new Vuex.Store({ // });
+ <./store/store.js> mutations: { 	함수(state) { return state.num (인자로 스테이트를 가져와서 값에 접근할수있다 vuex의 규약)	 } }
+
+ mutation은 인자를 하나만 넘길수있다!!!! 넘길게많으면 객체화시켜서 ㄱㄱ
+// App.vue this.$store.commit('함수'); // App.vue에서 mutations에 접근해서 발동하려면 
+commit이라는 api를 쓴다 this.$store.commit('함수', 인자)로 넘길수있음 인자에는 객체로 넘겨도된다. 
+{ message: 'a', num: 20 } 이런식으로 
+그럼 mutations에서는 '함수'(state, 인자객체(보통 payload로 명명함.))로 받아서 인자객체.message로 데이터를 받을수있다. 
+리스트 배열에는 JSON객체가 들어갈수있다.
+ https://velog.io/@yjyoo/vue.js-Vuex-%EC%A0%95%EB%A6%AC
+
+
+ 헬퍼함수는 인자값을 자동으로 받아준다. 
+
+import Vue from 'vue' 
+import Vuex from 'vuex' 
+Vue.use('Vuex) 해야하나?
+export const store = new Vuex.Store
+({ 	state: {}, 	getters: {}, 	mutations: {}, 	actions: {} }); 
+
+export뜻 : 특정 파일에서 변수를 꺼내 다른 파일에서 사용 가능하게 하는 문법 
+해서 다른데서 import할때 export default를 하지 않으면 {변수명}으로 가져와야한다. 
+default가 붙으면 {}안해도되고 쓸 변수명으로 바꿔서 들고올수있따
+
+
+created() O 배열이 아닌 객체를 props로 내릴때는 props: { 프롭스명: Object } 해줘야한다. 
+
+이벤트버스를쓸때 (util) 이벤트버스 라는것은 빈 이벤트 객체를 만들어서 빈객체를통해 컴포터는간의 데이터를 전달하는것을 의미 
+(export default new Vue()) 그리고 App에 등록한다 버스는 보통 라이프사이클훅에 정의한다. 버스를 받는컴포넌트에서 이벤트를 
+올릴때는 bus.$emit('...') 으로 올리고 App에는 bus를 import한다 버스이벤트를 올리는쪽이든 받는쪽이든 created()안에 정의하고 
+bus.$on(''', 밑에함수명)으로한다= App에서는 데이터에 ...: 불런으로 정의하고 메서드에 props로 내려줄 함수를 정의하고 컴포넌트로 내린다 
+그리고 created()로 시작해서 끝낼때는 (여기서말하는건 스피너 로딩이미지를말함) beforeDestroy() 안에 bus.$off로 끝맺음. 뷰3에서는
+ $.on $off 과같이 이벤트버스를 지원하지않는다 그러므로 3버전에서는 VUEX로 관리하는게 맞는거같다 
+
+HOC (하이오더컴포넌트) ! = mixin
+컴포넌트 공통화는 컴포넌트를 재사용해서 slot으로 작업하면되고, axios api등 코드같은것도 하나의변수로 공통화시키면 깔끔 
+하이오더컴포넌트는 script안에 공통적인부분을 공통화시는것. 어케하냐면 views폴더에 js파일을 하나만든다 그리고 함수를만듬 
+exportdefault로 라우터정의하는곳에 component: 함수이름('컴포넌트이름') 그럼 js파일에서도 인자를 name으로 컴포넌트이름을 인자로받는다ㅇ
+ 그리고 컴포넌트를 하나 생성한다. 함수는(렌더링속성<render()였나? : 컴포넌트생성한것 넣음) 이것도 걍 view폴더에만듬 
+ex) HOC.js import 컴포넌트 export default function HOC(name) { return { name: name, (name은 페이지표시를위함. 
+결국엔 모든공통화를 한다음 중복컴포넌트나 중복데이터나 중복로직이나, 공통화된 코드빼고는 모두 삭제함.!!) 
+created() { 공통코드(dispatch로 액션에 api호출(페이지name에따라서 호출) 한다음state로접근해서 데이터변경코드까지 
+그외 추가적인 로직}, render(createElement) { return createElement(생성컴포넌트);

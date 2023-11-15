@@ -1,0 +1,393 @@
+Node
+
+module.exports는 파일에 하나만 써야 함. - 다른데서도 쓸쑤있따 (내보낸다)
+꼬꼬무해서 모듈 여러개 잇고 잇고 할수있음
+exports는 모듈로부터 내보내지는 데이터들을 담고 있는 하나의 객체이다.
+
+module.exports = {
+    odd,
+    even,
+}   === export default { odd, even }
+
+module.exports와 exports.add = add 이런식으로 두개 같이 쓸 수는 없다.
+
+const { odd, even } = require('./var'); === import { odd, even } from './var'
+
+완전히 1대1 대응은 되지 않는다. (완전 같지는 않다)
+import는 맨 위에 써야함.
+
+코드 효율적인지 돌려서 콘솔로 시간보는법
+: console.time('lsk')
+.......
+...../
+console.timeEnd('lsk')
+
+setTimeout('함수', 초) : 몇초후 함수실행
+변수 = setInterval(함수, 초): 몇초마다 함수반복 / clearInterval(변수) : 셋인터벌취소 (변수에담아서)
+
+노드에서 전역에 this는 global이 아니다. 빈 객체 {}이다. 
+이 말은 === module.exports === exports === {} 같은 말이란거다.
+그 외에는 자바스크립트나 다 같다. 전역 스코프의 this만 module.exports라는거.
+
+
+서로가 서로를 참조하게되면(require) 무한 순환참조가 일어난다.
+그러면 노드가 알아서 빈 객체로 바꿔버린다.
+
+노드를 실행하면 프로세스가 하나뜬다. (cmd-> node-> process) 
+process.cwd() 어디서 노드를 사용했는지.
+
+- process.env
+시스템 환경변수들이 들어있는 객체
+비밀키(DB pw, 서드파티 앱 키 등) 보관하는 용도로쓰임
+환경 변수는 process.env로 접근 가능
+ex :) const secretId = process.env.SECRET_ID;
+       const secretCode = process.env.SECRET_CODE;
+실제로 시크릿코드를 불러오면 그게 적혀있지 시크릿코드는 안적혀있다
+비밀키를 가리는 용도다.
+
+process.uptime() -> 노드 프로세스가 실행된지 시간확인
+process.exit(0) -> 노드 프로세스 종료
+process.extI(1) -> 0이면 에러가 없이 꺼진것, 1이면 에러가 있이 꺼진것 서버에서 에러가 있으면 exit(1)해서 
+오류가 있다는걸 알리고 끈다.
+
+const os = require('os')  -> 노드의 예약어 같은것 노드의 모듈(os)를 불러온다.
+
+* os.freemem(), os.cpus()
+cpu의정보, 등 중요한 이유 -> 코어가 몇개인지 확인, 쓰레드 등 환경마다 다르니까 cpus()로 확인
+os의 스레드와, 노드의 스레드는 틀리다! (하드웨어적 스레드, 노드의 스레드)
+
+>>os.arch() : process.arch와 동일
+>>os.platform(): process.platform과 동일
+>>os.type() : 운영체제의 종류
+>>os.uptime(): 운영체제 부팅 후 흐른 시간 != process.uptime()
+>>os.hostname() : 컴퓨터의 이름
+>>os.release() : 운영체제의 버전
+>>os.homedir(): 홈 디렉터리 경로
+>>os.tmpdir(): 임시 파일 저장 경로
+>>os.cpus() : 컴퓨터의 코어 정보
+>>os.freemem() : 사용 가능한 메모리(ram) 을 보여줌
+>>os.totalmem() : 전체 메모리 용량 보여줌
+=> node js 홈페이지에 api doc 문서
+
+
+const path = require('path');
+
+// window : C:\, C:\\users 파일경로를 이렇게 쓴다
+// linux / mac : /users/sglee 이렇게 쓴다
+
+// 그래서 경로 처리할때는 path모듈을 쓰는게 좋다
+// 알아서 처리해줌
+// path.join('디렉터리네임', 'var.js')
+//\...\...\...\var.js로 합쳐준다 (윈도우)
+// /.../.../../var.js로 합쳐준다 (맥, 리눅스)
+//맥 + 리눅스 는 포식스라고 부른다
+
+//path.resolve('디렉이름', '/var.js')
+//  /var.js 처럼 절대경로가 있으면 
+// join은 절대경로를 무시한다 (상대경로)
+// resolve는 절대경로를 존중함 (/varjs가 최상위 디렉터리로)
+
+path 예약어들 나중에 보셈
+
+
+
+WHATWG 방식이 serachparams,
+기존 노드 방식이 querystring
+
+---------------
+
+crypto (단방향 암호화)
+: 암호화는 가능하지만 복호화는 불가능
+- 암호화 : 평문을 암호화로 만듦
+- 복호화 : 암호를 평문으로 해독
+
+단방향 암호화의 대표주자는 해시 기법
+- 문자열을 고정된 길이의 다른 문자열로 바꾸는 방식
+- abcdefghj 문자열 -> qvew
+(abcdefghj 는 해시화 하면 언제나 같은 결과(qvew) 가 된다)
+그래서 안전하다~ (왜? : 해시화 된것(qvew)를 abcdefghj로 되돌리기가 매우 어렵기때문) (복호화 불가능)
+= uuid 같은 건가?
+
+
+Hash사용하기-
+createHash(알고리즘): 사용할 해시 알고리즘을 넣어준다.
+- md5, sh1, sha256, sha512 드이 가능하지만 md5와 sha1은 이미 취약점 발견
+( 컴퓨터가 점점 발전하면서 취약점이 드러난다 )
+
+
+
+양방향 암호화
+- 대칭형 암호화(암호문 복호화 가능)
+- key가 사용되고, 암호화할 때와 복호화 할 때 같은 Key를 사용해야한다. (key관리 못하면 취약함)
+
+
+
+----util
+각종 편의 기능을 모아둔 모듈
+deprecated와 promisify가 자주 쓰임
+노드는 콜백함수를 지원함. asymc await이 안되서 매우 불편하다
+그럴때 promisify 로 감싸주면 then catch, async await패턴이 가능해진다! (promise전환)
+단, 콜백이 (error:data) => {} 형식 이어야 한다 ( 노드는 대부분 error:data로 되있다 ㅎㅎ )
+
+
+
+- 멀티쓰레딩, 워커쓰레드 찾아보기
+
+
+-파일시스템
+: 읽기
+const fs = require('fs').promises;
+
+fs.readFile('./readme.txt')
+    .then(() => {
+        console.log(data);
+        console.log(data.toString());
+    })
+    .catch((err) => {
+        throw err;
+    })
+
+파일시스템은 예외적으로 promises를 붙여주면 promise로 쓸 수 있게 된다.
+
+
+: 생성
+
+const fs = require('fs').promises;
+
+fs.writeFile('./writeme.txt', '글 입력 부분')
+    .then(() => {
+        console.log(data);
+        console.log(data.toString());
+    })
+    .catch((err) => {
+        throw err;
+    })
+
+
+:생성과 생성된파일 같이 읽어오기
+
+const fs = require('fs').promises;
+
+fs.readFile('./readme.txt')
+    .then(() => {
+        return fs.readFile('./writeme.txt');
+    })
+    .then((data) => {
+        console.log(data.toString());
+    )
+    .catch((err) => {
+        throw err;
+    })
+
+
+
+노드에서는 비동기면 논블로킹이고 동기면 블로킹이다
+비동기는 가는데 순서없다
+
+
+-----------
+버퍼와 스트림
+버퍼: 일정한 크기로 모아두는 데이터
+-일정한 크기가 되면 한 번에 처리
+-I버퍼링: 버퍼에 데이터가 찰 때까지 모으는 작업
+
+스트림: 데이터의 흐름
+일정한 크기로 나눠서 여러 번에 걸쳐서 처리 (나눠진 조각을 chunck 라고 부른다)
+버퍼의 크기를 작게 만들어서 주기적으로 데이터를 전달
+스트리밍: 일정한 크기의 데이터를 지속적으로 전달하는 작업
+
+
+-----
+스레드풀
+: fs, crypto, zlib 모듈의 메서드를 실행할 때는 백그라운드에서 동시에 실행됨
+스레드풀이 동시에 처리해줌
+
+커스텀이벤트 알ㅇㅏ보기
+
+
+예외처리
+에러처리는 프로세스를 보호하기 위함
+try/catch 붙일때 안붙일때 잘 구분
+promise의 catch는 필수
+
+process.on('uncaughtException', (err) => {
+console.log('에러' err); }                ->  에러 기록용으로 쓰는게좋다 (모든 에러를 잡아줌 모든은 아님 공식문서 ㄱ)
+
+
+ㅡSERVER
+localhost는 내부주소 -> 외부에서는 접근 불가능
+
+포트: 서버 내에서 프로세스를 구분하는 번호
+
+
+const http = require('http');
+const server = http.createServer((req, res) => {
+    res.writeHead('200', { 'Content-Type' : 'text/html; charset=utf-8' })
+    res.write('<h1>Hello Node!</h1>')
+    res.write('<p>Hello server</p>')
+    res.end('<p>Hello sglee</p>')
+})
+    .listen(8080);
+server.on('listening', () => {
+    console.log('8080번 포트에서 서버 대기 중입니다.');
+});
+server.on('error', (error) => {
+    console.log(error);
+})
+const server2 = http.createServer((req, res) => {
+    res.writeHead('200', { 'Content-Type' : 'text/html; charset=utf-8' })
+    res.write('<h1>Hello Node!</h1>')
+    res.write('<p>Hello server</p>')
+    res.end('<p>Hello sglee</p>')
+})
+    .listen(8081);
+server2.on('listening', () => {
+    console.log('8080번 포트에서 서버 대기 중입니다.');
+});
+server2.on('error', (error) => {
+    console.log(error);
+})
+
+이런 식으로 서버 2개이상을 띄우는 것도 가능하다~! 굳이 이렇게 할 필요는 없는듯
+async 로 response를 받아와서 response.end(리드파일 await한 변수) 하면 파일을 읽어옴과동시 끝맺음.
+
+
+
+-
+REST API
+- 서버의 자원을 정의하고 자원에 대한 주소를 지정하는 방법
+- /user이면 사용자 정보에 관한 정보를 요청하는 것
+- /post면 게시글에 관련된 자원을 요청하는것
+
+HTTP 요청 메서드
+GET: 서버 자원을 가져오려고 할 때 사용
+POST: 서버에 자원을 새로 등록하고자 할 때 사용(또는 뭘 써야할지 애매할 때)
+PUT: 서버의 자원을 요청에 들어있는 자원으로 치환하고자할 때 사용
+PATCH: 서버 자원의 일부만 수정하고자 할 때 사용
+DELETE: 서버의 자원을 삭제하고자할 때 사용
+
+RESTful
+: REST API를 사용한 주소 체계를 이용하는 서버
+- GET /user는 사용자를 조회하는 요청, POST /user는 사용자를 등록하는 요청
+
+
+Express-------------
+
+미들웨어 쓰는 이유: 요청 라우터마다 공통되는 코드때문에
+
+중복 라우터줄이는법: (라우터매개변수)
+app.get('/category/java', (req, res) => {
+    res.sned('hello java');
+});
+app.get('/category/javascript', (req, res) => {
+    res.sned('hello javascripts');
+});
+app.get('/category/C', (req, res) => {
+    res.send('hello C');
+});
+
+이거를
+
+app.get('/category/:name', (req, res) => {
+    res.send('hello ${req.params.name}`);
+});
+주의할점: // 위에서 밑으로 실행되기때문에 이 코드를 다른 라우터들보다 제일 밑부분에 써야 전체적용이 되겠지
+
+app.get('*', (req, res) => {
+    res.send('hello errorpage');
+});
+// 이것도 vue랑 비슷하다 다만 vue는 순서상관없이 라우터정의 제외 url은 이리로 오게 되있지만
+노드는 이 모든 처리한다는것을 젤 아래에 써야될것이다
+
+* 한마디로 범위가 넓은 라우터들은 아래로 둬야한다
+
+res.send
+res.josn
+res.status
+res.writehead
+등 res는 하나만 드가야한다
+
+server.use(express.static(__dirname+"/public"));
+
+express.static은 어떤 파일을 읽을때 사용하는데, 원하는 값을 public이라는 폴더에서 불러온다는 뜻이다. 불러오는 모든 파일의 src는 __dirname/public이 된다는거임
+
+그러면 자동으로 index.css파일을 요청하게되면, 자동으로 /public 폴더에서 찾아옴
+
+노드는 싱글쓰레드이기에 에러처리를 해줘야하는데
+익스프레스가 자동으로 사용자화면에띄어주지만 이건 안되고 에러처리를 직접구현해야한다
+이 에러처리도 미들웨어이다
+*명심할것 라우터처리는 위에서 아래다
+
+에러미들웨어는
+app.use((err, req, res, next) => {
+log.error(eerr);
+})
+// 반드시 4개 다써야한다 다쓰지않더라도1!!!!!!!!!!
+
+에러미들웨어 대신에  미들웨어를 통해 에러처리를 할 수있다
+ex
+app.use((req, res, next) => {
+    res.status(404).send('404 에러처리');
+});
+
+try catch문 
+catch(error) {
+next(error) 할수있다 next는 ()안에 인수가 없으면 다음 미들웨어로
+넘어가는거지만 trycatch 에러처리할땐 인수넣으면의미가바뀜
+
+next(error하면) 모든 에러처리 담당하는 에러 미들웨어 아까
+app.use((err, req, res, next) => {
+    console.error(err);
+    res.send('에러표시');
+}) //모든 에러처리는 여기로온다
+
+next('route')는 다음라우트로넘어감
+
+
+요청과 응답을 기록하는것이 모건이다 morgan
+쿠키 쉽게쓰기 express)  쿠키파서 
+------------
+app.use(morgan('dev'));
+app.use(cookieParser());
+app.use(express.json()); //바디파서
+app.use(express.urlencoded({ extended: true })); //바디파서
+
+res.cookie('name', encodeURIComponent(name), {
+        expires: new Date(),
+        httpOnly: true,
+        path: '/',
+    })
+    res.clearCookie('name', encodeURIComponent(name), {
+        httpOnly: true,
+        path: '/',
+    })
+
+
+-STATIC 미들웨어
+app.use('요청 경로(/)', express.static(path.join(__dirname, 'public')))
+locahost:3000/index.html                            learn-express/public/src/index.html
+ex 파일리드하는 정적인것들 alias하는느낌
+
+
+session
+
+req.session.id = 'hello'; 방금 들온사람의 id만 헬로 개인의 저장공간이 하나생긴거다
+
+app.use(session({
+        resave: false,
+        saveUninitialized: false,
+        secret: 'lsk(쿠키암호화한것 저장내용)',
+        cookie: {
+            httpOnly: true,
+        }
+    }))
+})
+
+보통 쿠키파서랑 시크릿이랑 같게만든다
+
+multer - multipart/form-data
+
+form- 파일전송할때 필요 ㅇ
+
+
+* app.use 는 라우터 용도로 안 쓰는게 좋다 app.use는 라우터들의 공통 로직을 분리하는데 쓴다

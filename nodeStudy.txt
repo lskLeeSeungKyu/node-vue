@@ -1,0 +1,72 @@
+201 - 성공함 + 생성됨
+
+쿠키 세션-
+중요한 정보는 서버(세션)에 저장하고 쿠키에는 그 세션에 접근할수있는 키를 저장.
+
+보통 배포할때는 node_modules는 삭제하고 배포해서
+받을때 npm i 하면 패키지.json에 있는 설치설정파일의 존속된 파일
+즉 node_modules를 다시 받는다. 용량때문에
+
+morgan (모건)
+- 요청과 응답상태를 띄어주는 모듈
+app.use(morgan('dev'))
+
+cookieparser (쿠키파서)
+- 쿠키를 좀더 편리하게씀 req.cookies { "" : "" } res.cookie('name', encodeURLComponent(name), {
+expres: new Date(),
+httpOnly: true,
+path: '/',
+}))
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
+app.use(cookieParser('암호화할코드변수이름'))
+req.signedCookies; 하면됨
+
+express에서 제공하는 미들웨어
+
+app.use(express.json()); 하면 클라이언트에서 json 데이터를 보냈을때
+파싱해서 req.body로 쓸수있다. (전역)위에모두전역지정
+
+app.use(express.ur;encoded({ extended: true })); 하면 form 파싱 (대신 form에서보내는 이미지,파일은 안됌
+이거 하려면 멀터 써야댐)
+express.json, express.urlencoded 는 쌍으로 필수적으로쓰자
+
+app.use('/'(요청 경로), express.static(path.join(__dirname, 'public123')));
+localhost:3000/lsk.html    			learn-express/public123/lsk.html 
+이렇게 맞춰놓는다. 보안상에도 좋기때문
+
+보통 모든 미들웨어는 내부적으로 next를 실행한다. 그렇지만 static은 
+만약 요청하는 파일을 찾았다. 그러면 수행해주고 next를 안해버린다 만약 없다? 그러면 next()해줌
+그러고서는 못찾은 요청을 밑에서 쭉 찾는다.
+
+보통 정적으로 요청하는 파일은 (명시되있는거.png.html등) 미들웨어 순서를 
+모건밑에많이둔다 왜냐하면 밑에두면 쓰이지도않는 미들웨러를 다 실행시켜서 낭비하기때문
+그리고 동적인 about 이런걸 요청하면 젤밑에둠
+
+미들웨어 순서 => 성능에 영향을받는다 
+무조건 정해진순서는없고 그 서비스에맞게 순서를 정해줘야한다.
+선언부: const session = require('express-session')
+app.use(session())라고 미들웨어쓰면 
+req.session 사용자에대한 세션이 된다. 이거 자체가 그 사용자에대한 고유한 세션임
+req.session.id = 'hello'; 라고 쓰면은 요청을 보낸사람만 hello가 된다 (모든사용자의 아이디가 hello가되는게아님)
+(개인의 저장공간이 생김 그게 바로 express session 기능임)
+
+미들웨어 쓸때 app.use(session({
+		resave: false,
+		saveUninitialized: false,
+ 		secret: '쿠키파서로 암호화한 코드변수이름(위에)',
+		cookie: {
+			httpOnly: true,
+		}))
+
+미들웨어간의 데이터 공유할때 req.data =  하면댐
+
+-미들웨어확장법
+app.use('/', (req, res, next) => {
+	if (req.session.id) { // 로그인해서 session에 아이디가있다 -> 로그인을 했을시
+		express.static(__dirname, 'public')(req, res, next) // 얘를 실행한다. 로그인을했다면 express.static으로 사진,데이터등 프론트로 전달을 해줄것이고
+	}
+} else { //로그인을 안했다면 넥스트로 다음으로 넘어가겠다
+	next();
+}

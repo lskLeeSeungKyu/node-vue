@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="testMapper">  
+
+  <insert id="NoteInsert">
+    INSERT INTO BOARD_TB(BOARD_TITLE, BOARD_CONTENT) VALUES(#{board_title}, #{board_content})
+  </insert>
+
+  <insert id="Register">
+    INSERT INTO USER_TB(USER_ID, USER_PW) VALUES(#{user_id}, #{user_pw})
+  </insert>
+
+  <select id="NoteSelect">
+    SELECT * FROM BOARD_TB
+  </select>
+
+  <delete id="NoteDelete">
+    DELETE FROM BOARD_TB WHERE BOARD_CONTENT = #{board_content}
+  </delete>
+
+  <select id="Login">
+    SELECT USER_ID, USER_PW FROM USER_TB WHERE USER_ID = #{user_id}
+  </select>
+</mapper>

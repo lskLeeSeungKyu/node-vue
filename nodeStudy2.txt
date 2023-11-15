@@ -1,0 +1,111 @@
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const morgan = require('morgan');
+const path = require('path');
+const session = require('express-session');
+const dotenv = require('dotenv');
+
+dotenv.config();
+const pageRouter = require('./routes/page');
+
+const app = express();
+app.set('port', process.env.PORT || 8001);
+app.set('view engine', 'html');
+
+app.use(morgan('dev'));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser(process.env.COOKIE_SECRET));
+app.use(session({
+    resave: false,
+    saveUninitialized: false,
+    secret: process.env.COOKIE_SECRET,
+    cookie: {
+        httpOnly: true,
+        secure: false,
+    },
+}));
+
+app.use('/', pageRouter);
+
+app.use((req, res, next) => {
+    const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
+    error.status = 404;
+    next(error); //에러 미들웨어로 넘긴다
+});
+
+app.use((err, req, res, next) => {
+    res.locals.message = err.message;
+    res.locals.error = process.env.NODE_ENV !== 'production' ? err : {};
+    res.status(err.status || 500);
+    res.render('error');
+});
+
+app.listen(app.get('port'), () => {
+    console.log(app.get('port'), '번 포트에서 대기중');
+});
+
+
+--- 노드 mysql, mybatis orm
+
+const express = require('express');
+const app = express();
+const mysql = require('mysql');  //My-sql을 사용하였다.
+const mybatisMapper = require('mybatis-mapper');
+const morgan = require('morgan');
+
+app.use(morgan('dev'));
+app.get('/', (req, res) => {
+    res.send('a');
+})
+const connection = mysql.createConnection({  //커넥션 생성
+    host: 'localhost',
+    user: 'root',
+    database: 'nodejs',
+    password : '1234',
+    port: 3306
+  });
+   
+  new Promise( (res,rej)=>{
+    connection.query("select * from nodejs", function (error, results, fields) {  //조회
+        if (error) {
+            console.log(error);
+            rej(error);  //실패시 catch행동을 한다.
+        } else {
+            console.log(results);
+            res(results);  //성공시 then 이후의 행동을 한다.
+        }
+    });
+}).then( res =>{  //성공하면 들어오는 구간
+    connection.end();  
+}).catch( err =>{  //실패하면 들어오는 구간
+    if(connection != null){
+        connection.end();  
+    }
+});
+
+//흔히 알고있는 매퍼로드(xml이 있는 디렉토리 주소&파일위치를 입력하여주세요!!!)
+mybatisMapper.createMapper([ './testMapper.xml' ]);  //예) xml파일이 D드라이브에 있다면, D:/매퍼.xml
+ 
+//조회할 파라미터
+var param = {
+    test_id : 1
+}
+ 
+//질의문 형식
+var format = {language: 'sql', indent: '  '};
+var query = mybatisMapper.getStatement('testMapper', 'testBasic', param, format);
+//첫번째는 xml의 name값, 두번째는 해당 xml의 id값, 세번째는 파라미터, 마지막은 포맷이다.
+
+console.log(query);  //해당쿼리가 조합된 것을 볼 수 있다.
+
+connection.query(query, function (error, results, fields) {  //조회
+    if (error) {
+        console.log(error);
+    }
+    console.log(results);
+});
+
+
+app.listen(3000, () =>  console.log('익스실행'));
